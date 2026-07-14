@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -1138,8 +1139,22 @@ const APP_VERSION = '2.6';
 
 // ── CONFIG FIREBASE ────────────────────────────────────────
 
-const fbApp = initializeApp(window.firebaseConfig);
-const db    = getFirestore(fbApp);
+// Firebase est facultatif : sans config.js, l'app reste utilisable en local.
+let db = null;
+let firebaseEnabled = false;
+const firebaseConfig = window.firebaseConfig;
+const hasFirebaseConfig = firebaseConfig && ['apiKey', 'authDomain', 'projectId', 'appId']
+  .every(key => typeof firebaseConfig[key] === 'string' && firebaseConfig[key] && !firebaseConfig[key].startsWith('VOTRE_'));
+
+if (hasFirebaseConfig) {
+  try {
+    const fbApp = initializeApp(firebaseConfig);
+    db = getFirestore(fbApp);
+    firebaseEnabled = true;
+  } catch (e) {
+    console.warn('Configuration Firebase invalide : mode local activé.', e);
+  }
+}
 
 // ── UTILITAIRES ────────────────────────────────────────────
 const pad  = x  => String(x).padStart(2,'0');
@@ -1164,6 +1179,7 @@ function showSync(state) {
   const banner=document.getElementById('sync-banner');
   const dot=document.getElementById('sync-dot');
   const txt=document.getElementById('sync-text');
+  if (state==='local') { banner.classList.add('show'); banner.classList.remove('error'); dot.className='sync-dot'; txt.textContent='Enregistré sur cet appareil'; setTimeout(()=>banner.classList.remove('show'),2200); return; }
   if (state==='ok') { banner.classList.add('show'); banner.classList.remove('error'); dot.className='sync-dot'; txt.textContent='Synchronisé ✓'; setTimeout(()=>banner.classList.remove('show'),2000); }
   else if (state==='syncing') { banner.classList.add('show'); banner.classList.remove('error'); dot.className='sync-dot syncing'; txt.textContent='Synchronisation…'; }
   else if (state==='error') { banner.classList.add('show'); banner.classList.add('error'); dot.className='sync-dot error'; txt.textContent='Hors ligne – données locales'; }
@@ -1192,6 +1208,16 @@ function loadLocal() {
 
 // ── FIREBASE : ÉCRITURE ───────────────────────────────────
 async function fbSet(collName, entry) {
+  if (!firebaseEnabled) {
+    const items = DB[collName];
+    const index = items.findIndex(item => String(item.id) === String(entry.id));
+    if (index === -1) items.push(entry);
+    else items[index] = entry;
+    saveLocal();
+    refreshLocalCollection(collName);
+    showSync('local');
+    return;
+  }
   try {
     showSync('syncing');
     await setDoc(doc(db, collName, String(entry.id)), entry);
@@ -1200,6 +1226,13 @@ async function fbSet(collName, entry) {
 }
 
 async function fbDelete(collName, id) {
+  if (!firebaseEnabled) {
+    DB[collName] = DB[collName].filter(item => String(item.id) !== String(id));
+    saveLocal();
+    refreshLocalCollection(collName);
+    showSync('local');
+    return;
+  }
   try { await deleteDoc(doc(db, collName, String(id))); }
   catch(e) { showSync('error'); }
 }
@@ -1208,7 +1241,21 @@ async function fbDelete(collName, id) {
 // On écoute les 30 derniers jours pour chaque collection
 const since = Date.now() - 30*24*60*60*1000;
 
+function refreshLocalCollection(key) {
+  if (key==='tetees') { renderTeteeHistory(); renderYesterdayTetees(); updateLastLabels_tetee(); }
+  if (key==='couches') { updateCoucheCounters(); updateLastLabels_couche(); renderCoucheHistory(); renderSellesHistory(); }
+  if (key==='soins') { updateLastLabels_soin(); renderSoinHistory(); }
+  if (key==='poids') { renderPoidsChart(); }
+  if (key==='routine') { renderRoutineToday(); renderYesterdayRoutine(); }
+  if (key==='siestes') { renderSiestesHistory(); renderYesterdayRoutine(); }
+  if (key==='vomis') { renderVomisHistory(); }
+  if (key==='temperatures') { renderTemperaturesHistory(); }
+  if (key==='bilans') { renderBilanToday(); renderBilansHistory(); }
+  updateHome();
+}
+
 function listenCollection(collName, key, renderFn) {
+  if (!firebaseEnabled) return;
   const q = query(collection(db, collName), where('ts_num', '>=', since), orderBy('ts_num','desc'));
   onSnapshot(q, snap => {
     DB[key] = snap.docs.map(d => d.data());
@@ -1229,6 +1276,7 @@ function listenCollection(collName, key, renderFn) {
 
 // Poids : pas de filtre date
 function listenPoids() {
+  if (!firebaseEnabled) return;
   onSnapshot(collection(db, 'poids'), snap => {
     DB.poids = snap.docs.map(d => d.data()).sort((a,b)=>a.date.localeCompare(b.date));
     saveLocal(); renderPoidsChart(); updateHome();
