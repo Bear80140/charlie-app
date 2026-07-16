@@ -30,11 +30,9 @@ En cas de doute concernant la santé d’un enfant, contactez un professionnel d
 Le projet est volontairement simple : pas de dépendance à installer, pas de compilation, pas de compte imposé.
 
 1. Clonez le dépôt. (Au préalable, s'être connecté à son compte github). "Use this template" puis "create a new repository" puis donnez le nom souhaité à l'app ex : toto-app), laisser le projet en public et "create repository". 
-2. Créez votre fichier de configuration Firebase, comme expliqué ci-dessous.
-3. Servez les fichiers depuis un petit serveur web local ou un hébergement HTTPS.
-4. Ouvrez l’application dans votre navigateur.
-
-> Évitez d’ouvrir directement `index.html` en double-cliquant dessus : certaines fonctions de navigateur, notamment l’installation PWA et le service worker, fonctionnent mieux via un serveur web.
+2. Créez votre fichier de configuration Firebase, comme expliqué ci-dessous. Coller les données Firestore dans config.js.example et renommer le fichier en config.js
+3. Sur Github, settings, pages, remplacer none par Main puis save. Au bout d'une minute, le lien vers votre appli apparaît. 
+4. Ouvrez l’application sur votre smartphone, l'installer sur le bureau comme une appli. 
 
 ## Configurer Firebase
 
