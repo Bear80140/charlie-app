@@ -46,11 +46,11 @@ Rendez-vous sur la [console Firebase](https://console.firebase.google.com/) et c
 
 Dans ce projet :
 
-1. Ajoutez une application **Web**.
-2. Activez **Cloud Firestore**.
-3. Récupérez la configuration proposée pour votre application web.
+1. Créer un projet Firebase ; puis Base de donnée et stockage, Firestore ; puis paramètres, general, en bas logo </>
+2. Récupérez la configuration proposée pour votre application web.
+3. Les copier sur github dans confis.js.example (voir paragraphe suivant). 
 
-Elle ressemble à ceci :
+La config ressemble à ceci :
 
 ```js
 const firebaseConfig = {
@@ -80,11 +80,7 @@ window.firebaseConfig = {
 };
 ```
 
-Ne publiez pas votre `config.js` personnel dans ce dépôt. Ajoutez bien cette ligne à votre `.gitignore` :
 
-```gitignore
-config.js
-```
 
 ### À propos de la sécurité Firebase
 
