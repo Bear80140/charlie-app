@@ -29,7 +29,7 @@ En cas de doute concernant la santé d’un enfant, contactez un professionnel d
 
 Le projet est volontairement simple : pas de dépendance à installer, pas de compilation, pas de compte imposé.
 
-1. Téléchargez ou clonez le dépôt.
+1. Clonez le dépôt. (Au préalable, s'être connecté à son compte github). "Use this template" puis "create a new repository" puis donnez le nom souhaité à l'app ex : toto-app), laisser le projet en public et "create repository". 
 2. Créez votre fichier de configuration Firebase, comme expliqué ci-dessous.
 3. Servez les fichiers depuis un petit serveur web local ou un hébergement HTTPS.
 4. Ouvrez l’application dans votre navigateur.
